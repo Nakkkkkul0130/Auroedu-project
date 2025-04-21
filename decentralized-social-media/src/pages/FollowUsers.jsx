@@ -6,12 +6,12 @@ function FollowUsers() {
   const [usernameInput, setUsernameInput] = useState('');
   const [isUsernameEntered, setIsUsernameEntered] = useState(false);
 
-  // This will load the profiles when the username is entered
   useEffect(() => {
     if (currentUsername) {
       const storedProfiles = JSON.parse(localStorage.getItem('profiles')) || [];
-      // Exclude the current user's profile
-      const otherProfiles = storedProfiles.filter(profile => profile.username !== currentUsername);
+      const otherProfiles = storedProfiles.filter(
+        (profile) => profile.username !== currentUsername
+      );
       setProfiles(otherProfiles);
     }
   }, [currentUsername]);
@@ -19,22 +19,16 @@ function FollowUsers() {
   const handleFollow = (targetUsername) => {
     const storedProfiles = JSON.parse(localStorage.getItem('profiles')) || [];
 
-    const updatedProfiles = storedProfiles.map(profile => {
-      // For the target user -> add me to their followers (ensure followers is an array)
+    const updatedProfiles = storedProfiles.map((profile) => {
       if (profile.username === targetUsername) {
-        if (!profile.followers) {
-          profile.followers = []; // Ensure followers is always an array
-        }
+        profile.followers = profile.followers || [];
         if (!profile.followers.includes(currentUsername)) {
           profile.followers.push(currentUsername);
         }
       }
 
-      // For me -> add target user to my following (ensure following is an array)
       if (profile.username === currentUsername) {
-        if (!profile.following) {
-          profile.following = []; // Ensure following is always an array
-        }
+        profile.following = profile.following || [];
         if (!profile.following.includes(targetUsername)) {
           profile.following.push(targetUsername);
         }
@@ -45,32 +39,33 @@ function FollowUsers() {
 
     localStorage.setItem('profiles', JSON.stringify(updatedProfiles));
     alert(`You followed ${targetUsername}`);
-    window.location.reload(); // Reload to update list
+    window.location.reload();
   };
 
   const handleUsernameSubmit = () => {
-    // Save the entered username to localStorage and filter profiles
-    localStorage.setItem('username', usernameInput);
-    setCurrentUsername(usernameInput);
+    localStorage.setItem('username', usernameInput.trim());
+    setCurrentUsername(usernameInput.trim());
     setIsUsernameEntered(true);
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Follow Users</h1>
+    <div className="p-4 sm:p-8 max-w-3xl mx-auto">
+      <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center text-indigo-700">
+        Follow Users
+      </h1>
 
       {!isUsernameEntered ? (
-        <div>
+        <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
           <input
             type="text"
             value={usernameInput}
             onChange={(e) => setUsernameInput(e.target.value)}
             placeholder="Enter your username"
-            className="px-4 py-2 border rounded-md mb-4"
+            className="px-4 py-2 border rounded-md w-full sm:w-auto text-center sm:text-left"
           />
           <button
             onClick={handleUsernameSubmit}
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            className="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-all"
           >
             Submit
           </button>
@@ -78,19 +73,28 @@ function FollowUsers() {
       ) : (
         <>
           {profiles.length === 0 ? (
-            <p className="text-gray-500">No other profiles to follow.</p>
+            <p className="text-gray-500 text-center mt-6">
+              No other profiles to follow.
+            </p>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="mt-6 space-y-4">
               {profiles.map((profile) => (
-                <div key={profile.id} className="p-4 border rounded-lg shadow-lg flex justify-between items-center">
+                <div
+                  key={profile.id}
+                  className="p-4 rounded-lg shadow-md border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-white"
+                >
                   <div>
-                    <h2 className="text-xl font-semibold">{profile.username}</h2>
-                    <p className="text-gray-500 text-sm">{profile.bio}</p>
-                    <p className="text-sm mt-1">{(profile.followers || []).length} Followers</p> {/* Safe fallback */}
+                    <h2 className="text-lg font-semibold text-gray-800">
+                      @{profile.username}
+                    </h2>
+                    <p className="text-gray-600 text-sm">{profile.bio}</p>
+                    <p className="text-sm mt-1 text-indigo-600">
+                      {(profile.followers || []).length} Followers
+                    </p>
                   </div>
                   <button
                     onClick={() => handleFollow(profile.username)}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                    className="mt-2 sm:mt-0 px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-all"
                   >
                     Follow
                   </button>
